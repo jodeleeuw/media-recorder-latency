@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head> </head>
+  <body>
+    <button id="setup">Setup</button>
+    <button id="start" disabled>Start Recording</button>
+    <div id="audio"></div>
+  </body>
+  <script>
+    let audioContext; 
+    let stream;
+    let recorder;
+    const recorded_chunks = [];
+
+    async function getRecorder() {
+      audioContext = new AudioContext();
+
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false,
+      });
+      recorder = new MediaRecorder(stream);
+
+      recorder.addEventListener("start", handleRecorderStart);
+      recorder.addEventListener("stop", handleRecorderStop);
+      recorder.addEventListener("dataavailable", handleDataAvailable);
+    }
+
+    function handleRecorderStart(){
+      setTimeout(stopRecording, 1500);
+    };
+
+    function handleDataAvailable(e){
+      if (e.data.size > 0) {
+        recorded_chunks.push(e.data);
+      }
+    }
+
+    function handleRecorderStop(){
+      const data = new Blob(recorded_chunks, { type: "audio/webm" });
+      const audio_url = URL.createObjectURL(data);
+      document.querySelector("#audio").innerHTML = `<p><audio id="playback" src="${audio_url}" controls></audio></p>`
+    }
+
+    function playTone() {
+      const note = audioContext.createOscillator();
+      note.frequency.value = 440;
+      note.connect(audioContext.destination);
+      note.start(audioContext.currentTime);
+      note.stop(audioContext.currentTime + 1);
+    }
+
+    function startRecording() {
+      recorder.start();
+    }
+
+    function stopRecording() {
+      recorder.stop();
+    }
+
+    document.querySelector("#setup").addEventListener("click", () => {
+      getRecorder();
+      document.querySelector("#start").disabled = false;
+    });
+
+    document.querySelector("#start").addEventListener("click", () => {
+      playTone();
+      startRecording();
+    });
+  </script>
+</html>
