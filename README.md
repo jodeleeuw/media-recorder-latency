@@ -1,2 +1,2 @@
-# media-recorder-latency
-Testing media recorder latency
+
+https://jodeleeuw.github.io/media-recorder-latency/test.html
