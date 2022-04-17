@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head> </head>
+  <body>
+    <button id="setup">Setup</button>
+    <button id="start" disabled>Start Recording</button>
+    <div id="audio"></div>
+  </body>
+  <script>
+    const recorded_chunks = [];
+    let audioContext;
+    let dest;
+    let recorder;
+
+    async function setup() {
+      audioContext = new AudioContext();
+
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false,
+      });
+
+      dest = audioContext.createMediaStreamDestination();
+      recorder = new MediaRecorder(dest.stream);
+
+      mic = audioContext.createMediaStreamSource(stream);
+      mic.connect(dest);
+
+      recorder.addEventListener("start", handleRecorderStart);
+      recorder.addEventListener("stop", handleRecorderStop);
+      recorder.addEventListener("dataavailable", handleDataAvailable);
+    }
+
+    function handleRecorderStart(){
+      setTimeout(stopRecording, 1500);
+    };
+
+    function handleDataAvailable(e){
+      if (e.data.size > 0) {
+        recorded_chunks.push(e.data);
+      }
+    }
+
+    function handleRecorderStop(){
+      const data = new Blob(recorded_chunks, { type: "audio/webm" });
+      const audio_url = URL.createObjectURL(data);
+      document.querySelector("#audio").innerHTML = `<p><audio id="playback" src="${audio_url}" controls></audio></p>`
+    }
+
+    function playTone() {
+      const note = audioContext.createOscillator();
+      note.frequency.value = 440;
+      note.connect(audioContext.destination);
+      note.start(audioContext.currentTime);
+      note.stop(audioContext.currentTime + 0.1);
+    }
+
+    document.querySelector("#setup").addEventListener("click", () => {
+      setup().then(()=>{
+        document.querySelector("#start").disabled = false;
+      });      
+    });
+
+    document.querySelector("#start").addEventListener("click", () => {
+      startRecording(); 
+      playTone();
+    });
+
+    function startRecording() {
+      recorder.start();
+    }
+
+    function stopRecording() {
+      recorder.stop();
+    }
+  </script>
+</html>
