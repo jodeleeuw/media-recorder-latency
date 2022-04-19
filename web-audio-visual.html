@@ -80,6 +80,9 @@
         recorder.start();
         document.querySelector("#display").style.backgroundColor = "white";
         playTone();
+        setTimeout(()=>{
+          document.querySelector("#display").style.backgroundColor = "black";
+        }, 500)
       }, 500)
       
     }
