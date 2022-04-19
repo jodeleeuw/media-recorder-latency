@@ -75,16 +75,24 @@
       startRecording(); 
     });
 
+    function showStim() {
+      const display_element = document.querySelector("#display");
+      const ro = new ResizeObserver((entries, observer) => {
+        playTone();
+        observer.unobserve(display_element);
+      });
+      ro.observe(display_element);
+      display_element.style.backgroundColor = "white";
+    }
+
     function startRecording() {
       setTimeout(()=>{
         recorder.start();
-        document.querySelector("#display").style.backgroundColor = "white";
-        playTone();
+        showStim();
         setTimeout(()=>{
           document.querySelector("#display").style.backgroundColor = "black";
         }, 500)
       }, 500)
-      
     }
 
     function stopRecording() {
