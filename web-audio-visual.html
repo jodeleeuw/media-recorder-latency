@@ -62,7 +62,7 @@
       note.frequency.value = 440;
       note.connect(dest);
       note.start(audioContext.currentTime);
-      note.stop(audioContext.currentTime + 0.1);
+      note.stop(audioContext.currentTime + 0.05);
     }
 
     document.querySelector("#setup").addEventListener("click", () => {
@@ -80,6 +80,9 @@
         recorder.start();
         document.querySelector("#display").style.backgroundColor = "white";
         playTone();
+        setTimeout(()=>{
+          document.querySelector("#display").style.backgroundColor = "black";
+        }, 500)
       }, 500)
       
     }
