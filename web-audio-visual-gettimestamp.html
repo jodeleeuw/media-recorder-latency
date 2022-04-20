@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      html, body {
+        background-color: black;
+        color:white;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="display" style="width:95vw; height:50vh; margin:auto; border: 2px dotted white;"></div>
+    <div style="width:95vw; margin-top:5vh; margin:auto; text-align:center;">
+      <button id="setup">Setup</button>
+      <button id="start" disabled>Start Recording</button>
+      <div id="audio"></div>
+    </div>
+  </body>
+  <script>
+    const recorded_chunks = [];
+    let audioContext;
+    let dest;
+    let recorder;
+    let starttime;
+
+    async function setup() {
+      audioContext = new AudioContext();
+
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false,
+      });
+
+      dest = audioContext.createMediaStreamDestination();
+      recorder = new MediaRecorder(dest.stream);
+
+      mic = audioContext.createMediaStreamSource(stream);
+      mic.connect(dest);
+
+      recorder.addEventListener("start", handleRecorderStart);
+      recorder.addEventListener("stop", handleRecorderStop);
+      recorder.addEventListener("dataavailable", handleDataAvailable);
+    }
+
+    function handleRecorderStart(){
+      starttime = audioContext.getOutputTimestamp().contextTime;
+      console.log(`start ${starttime}`);
+      showStim();
+      setTimeout(stopRecording, 1500);
+    };
+
+    function handleDataAvailable(e){
+      if (e.data.size > 0) {
+        recorded_chunks.push(e.data);
+      }
+    }
+
+    function handleRecorderStop(){
+      const data = new Blob(recorded_chunks, { type: "audio/webm" });
+      const audio_url = URL.createObjectURL(data);
+      document.querySelector("#audio").innerHTML = `<p><audio id="playback" src="${audio_url}" controls></audio></p>`
+    }
+
+    function playTone() {
+      const note = audioContext.createOscillator();
+      note.frequency.value = 440;
+      note.connect(dest);
+      note.start(audioContext.currentTime);
+      note.stop(audioContext.currentTime + 0.05);
+    }
+
+    document.querySelector("#setup").addEventListener("click", () => {
+      setup().then(()=>{
+        document.querySelector("#start").disabled = false;
+      });      
+    });
+
+    document.querySelector("#start").addEventListener("click", () => {
+      startRecording(); 
+    });
+
+    function showStim() {
+      const display_element = document.querySelector("#display");
+      const ro = new ResizeObserver((entries, observer) => {
+        playTone();
+        console.log(`resize ${audioContext.getOutputTimestamp().contextTime}`);
+        const offset = (audioContext.getOutputTimestamp().contextTime - starttime)*1000;
+        console.log(offset);
+        observer.unobserve(display_element);
+      });
+      ro.observe(display_element);
+      display_element.style.cssText = "background-color: white; width: 90vw; height:50vh; margin:auto;";
+    }
+
+    function startRecording() {
+      setTimeout(()=>{
+        recorder.start();
+        setTimeout(()=>{
+          document.querySelector("#display").style.backgroundColor = "black";
+        }, 500)
+      }, 500)
+    }
+
+    function stopRecording() {
+      recorder.stop();
+    }
+  </script>
+</html>
