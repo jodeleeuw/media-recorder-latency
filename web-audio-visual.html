@@ -42,7 +42,6 @@
     }
 
     function handleRecorderStart(){
-      showStim();
       setTimeout(stopRecording, 1500);
     };
 
@@ -89,6 +88,7 @@
     function startRecording() {
       setTimeout(()=>{
         recorder.start();
+        showStim();
         setTimeout(()=>{
           document.querySelector("#display").style.backgroundColor = "black";
         }, 500)
