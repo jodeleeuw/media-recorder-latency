@@ -21,7 +21,10 @@
     let audioContext;
     let dest;
     let recorder;
-    let starttime;
+    let starttime_context;
+    let starttime_audio_perf;
+    let starttime_perf;
+    let starttime_disp_perf;
 
     async function setup() {
       audioContext = new AudioContext();
@@ -43,8 +46,12 @@
     }
 
     function handleRecorderStart(){
-      starttime = audioContext.getOutputTimestamp().contextTime;
-      console.log(`start ${starttime}`);
+      starttime_context = audioContext.getOutputTimestamp().contextTime;
+      starttime_audio_perf = audioContext.getOutputTimestamp().performanceTime;
+      starttime_perf = performance.now();
+      console.log(`start context ${starttime_context}`);
+      console.log(`start audio perf ${starttime_audio_perf}`);
+      console.log(`start perf ${starttime_perf}`);
       showStim();
       setTimeout(stopRecording, 1500);
     };
@@ -83,13 +90,23 @@
       const display_element = document.querySelector("#display");
       const ro = new ResizeObserver((entries, observer) => {
         playTone();
-        console.log(`resize ${audioContext.getOutputTimestamp().contextTime}`);
-        const offset = (audioContext.getOutputTimestamp().contextTime - starttime)*1000;
-        console.log(offset);
+        let audio_ctx_time = audioContext.getOutputTimestamp();
+        let perf_time = performance.now();
+        console.log(`resize audio context ${audio_ctx_time.contextTime}`);
+        console.log(`resize audio performance ${audio_ctx_time.performanceTime}`);
+        console.log(`resize performance ${perf_time}`);
+        const offset_audio_context = (audioContext.getOutputTimestamp().contextTime - starttime_context)*1000;
+        const offset_audio_perf = (audioContext.getOutputTimestamp().performanceTime - starttime_audio_perf)*1000;
+        const offset_perf = (perf_time - starttime_perf)*1000;
+        console.log(`audio context offset ${offset_audio_context}`);
+        console.log(`audio performance offset ${offset_audio_perf}`);
+        console.log(`performance offset ${offset_perf}`);
         observer.unobserve(display_element);
       });
       ro.observe(display_element);
+      starttime_disp_perf = performance.now();
       display_element.style.cssText = "background-color: white; width: 90vw; height:50vh; margin:auto;";
+      console.log('request display change ', starttime_disp_perf);
     }
 
     function startRecording() {
