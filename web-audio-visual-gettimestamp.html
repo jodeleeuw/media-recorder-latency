@@ -118,7 +118,9 @@
       });
       ro.observe(display_element);
       starttime_disp_perf = performance.now();
-      display_element.style.cssText = "background-color: white; width: 90vw; height:50vh; margin:auto;";
+      setTimeout(() => {
+        display_element.style.cssText = "background-color: white; width: 90vw; height:50vh; margin:auto;";
+      }, 200);
       console.log('request display change ', starttime_disp_perf);
     }
 
