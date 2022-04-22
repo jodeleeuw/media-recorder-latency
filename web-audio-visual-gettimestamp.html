@@ -47,6 +47,7 @@
     }
 
     function handleRecorderStart(){
+      starttime_current = audioContext.currentTime;
       starttime_context = audioContext.getOutputTimestamp().contextTime;
       starttime_audio_perf = audioContext.getOutputTimestamp().performanceTime;
       starttime_perf = performance.now();
