@@ -47,12 +47,14 @@
     }
 
     function handleRecorderStart(){
+      const audio_ctx_ts = audioContext.getOutputTimestamp();
       starttime_current = audioContext.currentTime;
-      starttime_context = audioContext.getOutputTimestamp().contextTime;
-      starttime_audio_perf = audioContext.getOutputTimestamp().performanceTime;
+      starttime_context = audio_ctx_ts.contextTime;
+      starttime_audio_perf = audio_ctx_ts.performanceTime;
       starttime_perf = performance.now();
       console.log(`start context time ${starttime_context}`);
       console.log(`start current time ${starttime_current}`);
+      console.log('current - context: ', (starttime_current - starttime_context)*1000);
       console.log(`start audio perf ${starttime_audio_perf}`);
       console.log(`start perf ${starttime_perf}`);
       showStim();
@@ -93,9 +95,12 @@
       const display_element = document.querySelector("#display");
       const ro = new ResizeObserver((entries, observer) => {
         playTone();
-        let perf_time = performance.now();
-        console.log(`resize performance ${perf_time}`);
+        const perf_time = performance.now();
+        const audio_ctx_ts = audioContext.getOutputTimestamp();
+        console.log(`resize audio context ${audio_ctx_ts.contextTime}`);
         console.log(`resize audio current ${audioContext.currentTime}`);
+        console.log(`resize audio perf ${audio_ctx_ts.performanceTime}`);
+        console.log(`resize performance ${perf_time}`);
         const offset_audio_context = (audioContext.currentTime - starttime_context)*1000;
         const offset_audio_perf = (perf_time - starttime_audio_perf);
         const offset_perf = perf_time - starttime_perf;
