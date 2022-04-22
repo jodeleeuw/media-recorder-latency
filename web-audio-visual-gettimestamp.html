@@ -98,23 +98,28 @@
     function showStim() {
       const display_element = document.querySelector("#display");
       const ro = new ResizeObserver((entries, observer) => {
-        playTone();
-        const audio_ctx_ts_context = audioContext.getOutputTimestamp().contextTime;
-        const audio_ctx_ts_perf = audioContext.getOutputTimestamp().performanceTime;
-        const audio_ctx_current = audioContext.currentTime;
-        const perf_time = performance.now();
-        console.log(`resize audio context ${audio_ctx_ts_context}`);
-        console.log(`resize audio current ${audio_ctx_current}`);
-        console.log(`resize audio perf ${audio_ctx_ts_perf}`);
-        console.log(`resize perf ${perf_time}`);
-        const offset_audio_context = (audio_ctx_ts_context - starttime_context)*1000;
-        const offset_audio_perf = audio_ctx_ts_perf - starttime_audio_perf;
-        const offset_perf = perf_time - starttime_perf;
-        console.log(`audio context latency ${offset_audio_context}`);
-        console.log(`audio perf latency ${offset_audio_perf}`);
-        console.log(`perf latency ${offset_perf}`);
-        console.log('display change request to resize observer latency ', perf_time - starttime_disp_perf);
-        observer.unobserve(display_element);
+        console.log('resize observer fired');
+        for (let entry of entries) {
+          if (entry.target.id == "display" && entry.target.style.backgroundColor == "white") {
+            playTone();
+            const audio_ctx_ts_context = audioContext.getOutputTimestamp().contextTime;
+            const audio_ctx_ts_perf = audioContext.getOutputTimestamp().performanceTime;
+            const audio_ctx_current = audioContext.currentTime;
+            const perf_time = performance.now();
+            console.log(`resize audio context ${audio_ctx_ts_context}`);
+            console.log(`resize audio current ${audio_ctx_current}`);
+            console.log(`resize audio perf ${audio_ctx_ts_perf}`);
+            console.log(`resize perf ${perf_time}`);
+            const offset_audio_context = (audio_ctx_ts_context - starttime_context)*1000;
+            const offset_audio_perf = audio_ctx_ts_perf - starttime_audio_perf;
+            const offset_perf = perf_time - starttime_perf;
+            console.log(`audio context latency ${offset_audio_context}`);
+            console.log(`audio perf latency ${offset_audio_perf}`);
+            console.log(`perf latency ${offset_perf}`);
+            console.log('display change request to resize observer latency ', perf_time - starttime_disp_perf);
+            observer.unobserve(display_element);
+          }
+        }
       });
       ro.observe(display_element);
       starttime_disp_perf = performance.now();
