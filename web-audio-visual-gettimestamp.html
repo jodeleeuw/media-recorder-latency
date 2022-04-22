@@ -26,9 +26,12 @@
     let starttime_audio_perf;
     let starttime_perf;
     let starttime_disp_perf;
+    let perf_time_at_audio_clock_start;
 
     async function setup() {
       audioContext = new AudioContext();
+      perf_time_at_audio_clock_start = performance.now();
+      console.log('setup perf - audio perf ', (perf_time_at_audio_clock_start - audioContext.getOutputTimestamp().performanceTime));
 
       stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -48,15 +51,16 @@
 
     function handleRecorderStart(){
       const audio_ctx_ts = audioContext.getOutputTimestamp();
-      starttime_current = audioContext.currentTime;
       starttime_context = audio_ctx_ts.contextTime;
       starttime_audio_perf = audio_ctx_ts.performanceTime;
+      starttime_current = audioContext.currentTime;
       starttime_perf = performance.now();
-      console.log(`start context time ${starttime_context}`);
-      console.log(`start current time ${starttime_current}`);
-      console.log('current - context: ', (starttime_current - starttime_context)*1000);
+      console.log(`start audio context ${starttime_context}`);
+      console.log(`start audio current ${starttime_current}`);
+      console.log('start audio current - context ', (starttime_current - starttime_context)*1000); // always ~50 ms in Chrome, ~30-40 ms in FF
       console.log(`start audio perf ${starttime_audio_perf}`);
       console.log(`start perf ${starttime_perf}`);
+      console.log('start perf - audio perf ', (starttime_perf - starttime_audio_perf));
       showStim();
       setTimeout(stopRecording, 1500);
     };
@@ -95,18 +99,21 @@
       const display_element = document.querySelector("#display");
       const ro = new ResizeObserver((entries, observer) => {
         playTone();
+        const audio_ctx_ts_context = audioContext.getOutputTimestamp().contextTime;
+        const audio_ctx_ts_perf = audioContext.getOutputTimestamp().performanceTime;
+        const audio_ctx_current = audioContext.currentTime;
         const perf_time = performance.now();
-        const audio_ctx_ts = audioContext.getOutputTimestamp();
-        console.log(`resize audio context ${audio_ctx_ts.contextTime}`);
-        console.log(`resize audio current ${audioContext.currentTime}`);
-        console.log(`resize audio perf ${audio_ctx_ts.performanceTime}`);
-        console.log(`resize performance ${perf_time}`);
-        const offset_audio_context = (audioContext.currentTime - starttime_context)*1000;
-        const offset_audio_perf = (perf_time - starttime_audio_perf);
+        console.log(`resize audio context ${audio_ctx_ts_context}`);
+        console.log(`resize audio current ${audio_ctx_current}`);
+        console.log(`resize audio perf ${audio_ctx_ts_perf}`);
+        console.log(`resize perf ${perf_time}`);
+        const offset_audio_context = (audio_ctx_ts_context - starttime_context)*1000;
+        const offset_audio_perf = audio_ctx_ts_perf - starttime_audio_perf;
         const offset_perf = perf_time - starttime_perf;
-        console.log(`audio context offset ${offset_audio_context}`);
-        console.log(`audio performance offset ${offset_audio_perf}`);
-        console.log(`performance offset ${offset_perf}`);
+        console.log(`audio context latency ${offset_audio_context}`);
+        console.log(`audio perf latency ${offset_audio_perf}`);
+        console.log(`perf latency ${offset_perf}`);
+        console.log('display change request to resize observer latency ', perf_time - starttime_disp_perf);
         observer.unobserve(display_element);
       });
       ro.observe(display_element);
