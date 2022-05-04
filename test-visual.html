@@ -74,11 +74,6 @@
 
     function showStim() {
       const display_element = document.querySelector("#display");
-      const ro = new ResizeObserver((entries, observer) => {
-        playTone();
-        observer.unobserve(display_element);
-      });
-      ro.observe(display_element);
       display_element.style.cssText = "background-color: white; width: 90vw; height:50vh; margin:auto;";
     }
 
