@@ -58,7 +58,7 @@
       note.frequency.value = 440;
       note.connect(audioContext.destination);
       note.start(audioContext.currentTime);
-      note.stop(audioContext.currentTime + 1);
+      note.stop(audioContext.currentTime + 0.1);
     }
 
     function startRecording() {
