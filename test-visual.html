@@ -38,6 +38,9 @@
 
     function handleRecorderStart(){
       showStim();
+      setTimeout(()=>{
+        document.querySelector("#display").style.backgroundColor="black";
+      }, 500)
       setTimeout(stopRecording, 1500);
     };
 
