@@ -37,6 +37,7 @@
     }
 
     function handleRecorderStart(){
+      playTone();
       showStim();
       setTimeout(()=>{
         document.querySelector("#display").style.visibility = "hidden";
@@ -83,7 +84,6 @@
     });
 
     document.querySelector("#start").addEventListener("click", () => {
-      playTone();
       startRecording();
     });
   </script>
